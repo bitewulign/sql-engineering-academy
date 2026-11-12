@@ -1,0 +1,39 @@
+# SQL Engineering Academy — .gitignore
+
+# ── Secrets and credentials ──────────────────────────────
+.env
+*.pem
+*.key
+*.crt
+secrets/
+
+# ── OS files ─────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Python ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyc
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+
+# ── Jupyter ───────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb~
+
+# ── Node ─────────────────────────────────────────────────
+node_modules/
+
+# ── Docker volumes ───────────────────────────────────────
+# (data lives in named volumes, not in the repo)
+
+# ── Instructor answer keys (never in public repo) ────────
+instructor/answer-keys/

@@ -1,0 +1,176 @@
+# SQL Engineering Academy — Learner Progress Tracker
+# Copy this file to your own fork and update it as you progress.
+# Never commit this file with personal information if the repo is public.
+#
+# How to use:
+#   status: not_started | in_progress | completed
+#   score: your quiz score out of the total (e.g., 13/15)
+#   completed_date: YYYY-MM-DD
+#   notes: anything you want to remember about this module
+
+learner:
+  name: ""                        # Your name or handle
+  track: ""                       # A (MySQL), B (PostgreSQL), or C (SQL Server)
+  start_date: ""                  # YYYY-MM-DD
+  target_completion: ""           # YYYY-MM-DD (optional goal)
+
+# ─────────────────────────────────────────────
+# SHARED MODULES (all tracks)
+# ─────────────────────────────────────────────
+
+shared_modules:
+  module_01:
+    title: "Database Foundations"
+    status: not_started
+    completed_date: ""
+    quiz_score: ""                # e.g., "13/15"
+    quiz_passed: false
+    lab_completed: false
+    exercises_completed: false
+    notes: ""
+
+# ─────────────────────────────────────────────
+# TRACK A — MySQL 8.0
+# ─────────────────────────────────────────────
+
+track_a:
+  module_02a:
+    title: "Creating Tables and Inserting Data (MySQL)"
+    status: not_started
+    completed_date: ""
+    quiz_score: ""
+    quiz_passed: false
+    notes: ""
+
+  module_03a:
+    title: "Querying Data (MySQL)"
+    status: not_started
+    completed_date: ""
+    quiz_score: ""
+    quiz_passed: false
+    notes: ""
+
+  # Add modules as the curriculum is released
+
+# ─────────────────────────────────────────────
+# TRACK B — PostgreSQL 16
+# ─────────────────────────────────────────────
+
+track_b:
+  module_02b:
+    title: "Creating Tables and Inserting Data (PostgreSQL)"
+    status: not_started
+    completed_date: ""
+    quiz_score: ""
+    quiz_passed: false
+    notes: ""
+
+  module_03b:
+    title: "Querying Data (PostgreSQL)"
+    status: not_started
+    completed_date: ""
+    quiz_score: ""
+    quiz_passed: false
+    notes: ""
+
+# ─────────────────────────────────────────────
+# TRACK C — SQL Server 2022
+# ─────────────────────────────────────────────
+
+track_c:
+  module_02c:
+    title: "Creating Tables and Inserting Data (SQL Server)"
+    status: not_started
+    completed_date: ""
+    quiz_score: ""
+    quiz_passed: false
+    notes: ""
+
+  module_03c:
+    title: "Querying Data (SQL Server)"
+    status: not_started
+    completed_date: ""
+    quiz_score: ""
+    quiz_passed: false
+    notes: ""
+
+# ─────────────────────────────────────────────
+# CROSS-PLATFORM MODULES
+# ─────────────────────────────────────────────
+
+cross_platform:
+  cx_01:
+    title: "Data Types Comparison"
+    status: not_started
+    completed_date: ""
+    notes: ""
+
+  cx_02:
+    title: "String Functions Comparison"
+    status: not_started
+    completed_date: ""
+    notes: ""
+
+# ─────────────────────────────────────────────
+# PORTFOLIO PROJECTS
+# ─────────────────────────────────────────────
+
+projects:
+  project_01:
+    title: "Retail Sales Database"
+    status: not_started
+    completed_date: ""
+    github_url: ""             # Link to your implementation
+    notes: ""
+
+  project_02:
+    title: "Banking System"
+    status: not_started
+    completed_date: ""
+    github_url: ""
+    notes: ""
+
+  project_03:
+    title: "Healthcare Records"
+    status: not_started
+    completed_date: ""
+    github_url: ""
+    notes: ""
+
+  project_04:
+    title: "E-commerce Analytics"
+    status: not_started
+    completed_date: ""
+    github_url: ""
+    notes: ""
+
+  project_05:
+    title: "HR Analytics"
+    status: not_started
+    completed_date: ""
+    github_url: ""
+    notes: ""
+
+  project_06:
+    title: "Data Engineering Pipeline"
+    status: not_started
+    completed_date: ""
+    github_url: ""
+    notes: ""
+
+# ─────────────────────────────────────────────
+# PYTHON INTEGRATION
+# ─────────────────────────────────────────────
+
+python_integration:
+  py_01:
+    title: "Connecting Python to SQL Databases"
+    status: not_started
+    completed_date: ""
+    notes: ""
+
+  py_02:
+    title: "SQLAlchemy and pandas"
+    status: not_started
+    completed_date: ""
+    notes: ""

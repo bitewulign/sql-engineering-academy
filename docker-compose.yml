@@ -1,0 +1,157 @@
+version: "3.9"
+
+# SQL Engineering Academy — Docker Compose
+# Runs MySQL 8.0, PostgreSQL 16, SQL Server 2022, Jupyter, pgAdmin, Adminer
+# Requires: Docker Desktop with 8+ GB RAM allocated
+#
+# Usage:
+#   cp .env.example .env     (edit passwords before first run)
+#   docker-compose up -d
+#   docker-compose ps
+#   docker-compose down
+
+services:
+
+  # ─────────────────────────────────────────────
+  # Microsoft SQL Server 2022
+  # ─────────────────────────────────────────────
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver2022
+    platform: linux/amd64          # required on Apple Silicon
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD}"
+      MSSQL_PID: Developer         # free Developer Edition
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+      - ./scripts/setup:/scripts/setup:ro
+    healthcheck:
+      test: >
+        /opt/mssql-tools18/bin/sqlcmd
+        -S localhost -U SA -P "${MSSQL_SA_PASSWORD}"
+        -C -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────
+  # PostgreSQL 16
+  # ─────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres16
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: academy
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/setup:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────
+  # MySQL 8.0
+  # ─────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: mysql80
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: academy
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./scripts/setup:/docker-entrypoint-initdb.d:ro
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost",
+             "-u", "root", "--password=${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────
+  # pgAdmin 4 (PostgreSQL GUI)
+  # Open: http://localhost:5050
+  # ─────────────────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_EMAIL}"
+      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_PASSWORD}"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────
+  # Adminer — lightweight multi-DB GUI
+  # Open: http://localhost:8080
+  # Supports MySQL, PostgreSQL, SQL Server
+  # ─────────────────────────────────────────────
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────
+  # Jupyter Notebook (Python + SQL integration)
+  # Open: http://localhost:8888
+  # Token printed in docker-compose logs jupyter
+  # ─────────────────────────────────────────────
+  jupyter:
+    image: jupyter/datascience-notebook:latest
+    container_name: jupyter
+    environment:
+      JUPYTER_ENABLE_LAB: "yes"
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./python-integration/notebooks:/home/jovyan/work
+      - ./datasets:/home/jovyan/datasets:ro
+    depends_on:
+      - mysql
+      - postgres
+      - sqlserver
+    restart: unless-stopped
+
+# ─────────────────────────────────────────────
+# Named volumes (data persists between restarts)
+# ─────────────────────────────────────────────
+volumes:
+  sqlserver_data:
+  postgres_data:
+  mysql_data:
+  pgadmin_data:
+
+# ─────────────────────────────────────────────
+# Networks
+# ─────────────────────────────────────────────
+networks:
+  default:
+    name: sql_academy_net

@@ -1,0 +1,7 @@
+module,quiz_name,date_taken,score,total,percent,passed,notes
+module-01,Quiz 01 — Database Foundations,,,,,%,false,
+module-02a,Quiz 02A — Creating Tables (MySQL),,,,,%,false,
+module-02b,Quiz 02B — Creating Tables (PostgreSQL),,,,,%,false,
+module-02c,Quiz 02C — Creating Tables (SQL Server),,,,,%,false,
+cx-01,CX-01 — Data Types Comparison,,,,,%,false,
+project-01,Project 01 Review — Retail Sales,,,,,%,false,

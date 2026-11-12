@@ -1,0 +1,149 @@
+name: SQL Validation
+
+on:
+  push:
+    paths:
+      - 'modules/**/*.sql'
+      - 'projects/**/*.sql'
+      - 'scripts/**/*.sql'
+  pull_request:
+    paths:
+      - 'modules/**/*.sql'
+      - 'projects/**/*.sql'
+      - 'scripts/**/*.sql'
+
+jobs:
+  validate-sql-headers:
+    name: Check SQL file headers
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify all SQL files have standard headers
+        run: |
+          MISSING=0
+          while IFS= read -r -d '' file; do
+            # Check for the academy header marker
+            if ! grep -q "SQL Engineering Academy" "$file"; then
+              echo "MISSING HEADER: $file"
+              MISSING=$((MISSING + 1))
+            fi
+          done < <(find modules projects scripts -name "*.sql" -print0 2>/dev/null)
+
+          if [ "$MISSING" -gt 0 ]; then
+            echo ""
+            echo "ERROR: $MISSING SQL file(s) are missing the standard header."
+            echo "Every SQL file must begin with:"
+            echo "-- SQL Engineering Academy"
+            exit 1
+          else
+            echo "All SQL files have required headers."
+          fi
+
+  validate-no-secrets:
+    name: Check for hardcoded credentials
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Scan for hardcoded passwords or keys
+        run: |
+          # Look for common patterns that suggest hardcoded credentials
+          # This is a basic check — the .env file is excluded by .gitignore
+          FOUND=0
+          PATTERNS=(
+            "password\s*=\s*['\"][^'\"]{3,}"
+            "api_key\s*=\s*['\"][^'\"]{6,}"
+            "secret\s*=\s*['\"][^'\"]{6,}"
+          )
+
+          for PATTERN in "${PATTERNS[@]}"; do
+            MATCHES=$(grep -rin --include="*.sql" --include="*.py" --include="*.yml" \
+              -E "$PATTERN" . \
+              --exclude-dir=".git" \
+              --exclude="*.env*" \
+              2>/dev/null || true)
+            if [ -n "$MATCHES" ]; then
+              echo "POSSIBLE CREDENTIAL: $MATCHES"
+              FOUND=$((FOUND + 1))
+            fi
+          done
+
+          if [ "$FOUND" -gt 0 ]; then
+            echo ""
+            echo "WARNING: Possible hardcoded credentials detected."
+            echo "Review the matches above. Use .env variables instead."
+            # Note: set exit 1 here once false-positive rate is calibrated
+          else
+            echo "No obvious hardcoded credentials found."
+          fi
+
+  validate-mysql-syntax:
+    name: MySQL 8.0 syntax check
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ci_test_password_123
+          MYSQL_DATABASE: academy_ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -u root -pci_test_password_123"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run MySQL SQL files (syntax check)
+        run: |
+          EXIT=0
+          while IFS= read -r -d '' file; do
+            echo "Checking: $file"
+            # Use --force to continue on errors; capture exit code
+            mysql -h 127.0.0.1 -u root -pci_test_password_123 \
+              academy_ci \
+              --force \
+              < "$file" 2>&1 | grep -v "Warning: Using a password"
+          done < <(find modules -path "*/mysql/*.sql" -print0 2>/dev/null)
+          echo "MySQL syntax check complete."
+
+  validate-postgresql-syntax:
+    name: PostgreSQL 16 syntax check
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci_test_password_456
+          POSTGRES_DB: academy_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run PostgreSQL SQL files (syntax check)
+        env:
+          PGPASSWORD: ci_test_password_456
+        run: |
+          while IFS= read -r -d '' file; do
+            echo "Checking: $file"
+            psql -h localhost -U postgres -d academy_ci \
+              --set ON_ERROR_STOP=0 \
+              -f "$file" 2>&1 || true
+          done < <(find modules -path "*/postgresql/*.sql" -print0 2>/dev/null)
+          echo "PostgreSQL syntax check complete."

@@ -1,0 +1,56 @@
+name: Bug Report
+description: Report incorrect SQL, wrong expected output, or a broken file
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve SQL Engineering Academy. Please fill in as much detail as possible.
+
+  - type: input
+    id: file
+    attributes:
+      label: File path
+      description: Which file contains the bug?
+      placeholder: "modules/module-01/code/mysql/01_first_queries.sql"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Database platform
+      options:
+        - SQL Server 2022
+        - PostgreSQL 16
+        - MySQL 8.0
+        - Multiple platforms
+        - Not SQL-specific
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What is wrong?
+      description: Describe the bug. Include the incorrect SQL or text.
+      placeholder: "The query in Section 3.3 returns NULL in PostgreSQL but the notes say it returns 'x'."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should it do instead?
+      description: Correct behavior or correct output.
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Database version
+      description: Exact version from SELECT @@VERSION / SELECT version() / SELECT VERSION()
+      placeholder: "MySQL 8.0.34"
+    validations:
+      required: false
